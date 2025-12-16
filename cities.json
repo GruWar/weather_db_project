@@ -1,0 +1,46 @@
+{
+  "cities": [
+    {
+      "city_name": "Prague",
+      "country_code": "CZ",
+      "lat": 50.088,
+      "lon": 14.4208,
+      "sources": {
+        "openweather": {
+          "city_query": "Prague,CZ"
+        },
+        "meteostat": {
+          "station_id": "11518"
+        }
+      }
+    },
+    {
+      "city_name": "Brno",
+      "country_code": "CZ",
+      "lat": 49.1952,
+      "lon": 16.608,
+      "sources": {
+        "openweather": {
+          "city_query": "Brno,CZ"
+        },
+        "meteostat": {
+          "station_id": "11723"
+        }
+      }
+    },
+    {
+      "city_name": "Ostrava",
+      "country_code": "CZ",
+      "lat": 49.8347,
+      "lon": 18.282,
+      "sources": {
+        "openweather": {
+          "city_query": "Ostrava,CZ"
+        },
+        "meteostat": {
+          "station_id": "11782"
+        }
+      }
+    }
+  ]
+}

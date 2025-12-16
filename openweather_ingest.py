@@ -1,11 +1,10 @@
+from dotenv import load_dotenv
 import psycopg2
 import requests
 import json
-from dotenv import load_dotenv
 import os
 
 load_dotenv()
-
 apikey = os.getenv("OPENWEATHER_API_KEY")
 cities = ['Prague,CZ', 'Brno,CZ', 'Ostrava,CZ']
 conn_params = {
@@ -15,7 +14,6 @@ conn_params = {
     "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASSWORD")
 }
-
 
 # Connect to DB and load data
 try:
