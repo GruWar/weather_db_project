@@ -46,8 +46,8 @@ for station, station_id in stations.items():
             print(response.text)
             continue
         cur.execute(
-            "INSERT INTO bronze.meteostat_raw (payload) VALUES (%s);",
-            (data,)
+            "INSERT INTO bronze.meteostat_raw (station_id,payload) VALUES (%s, %s);",
+            (station_id, data,)
         )
         print(f"Station: {station} OK!")
     except Exception as e:

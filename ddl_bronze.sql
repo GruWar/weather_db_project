@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS bronze.openweather_raw (
 CREATE TABLE IF NOT EXISTS bronze.meteostat_raw (
     raw_id BIGSERIAL PRIMARY KEY,
     load_date TIMESTAMP DEFAULT NOW(),
+    station_id INT NOT NULL,
     payload JSONB
 );
