@@ -1,10 +1,15 @@
+
+#=====================================================
+# Cities ingestion from JSON file
+#=====================================================
+# Imports
 from dotenv import load_dotenv
 import psycopg2
 import os
 import json
 
 load_dotenv()
-
+# DB connect parametters
 conn_params = {
     "host": os.getenv("DB_HOST"),
     "port": os.getenv("DB_PORT"),
@@ -12,6 +17,7 @@ conn_params = {
     "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASSWORD")
 }
+
 # load json
 try:
     with open("cities.json", "r", encoding="utf-8") as f:
@@ -59,5 +65,5 @@ for city in cities:
 conn.commit()
 cur.close()
 conn.close()
-
+print("Disconnected from DB")
 print("City ingest finished.")
