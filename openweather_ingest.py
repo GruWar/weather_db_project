@@ -26,7 +26,7 @@ except Exception as e:
 for city in cities:
     try:
         # OpenWeather get data from API
-        response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city}&APPID={apikey}")
+        response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&APPID={apikey}")
         if response.status_code == 200:
             payload_json = response.json()
             data = json.dumps(payload_json)
