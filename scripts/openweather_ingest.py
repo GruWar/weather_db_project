@@ -6,7 +6,6 @@ import os
 
 load_dotenv()
 apikey = os.getenv("OPENWEATHER_API_KEY")
-cities = ['Prague,CZ', 'Brno,CZ', 'Ostrava,CZ']
 conn_params = {
     "host": os.getenv("DB_HOST"),
     "port": os.getenv("DB_PORT"),
@@ -21,12 +20,22 @@ try:
     print("Connected to DB")
     cur = conn.cursor()
 except Exception as e:
-    print(f"Error:",e)
+    print(f"[ERROR]:",e)
 
-for city in cities:
+# --- LOAD CITIES FROM DB ---
+cur.execute("""
+    SELECT
+        city_query
+    FROM silver.dim_city
+    WHERE city_query IS NOT NULL
+""")
+
+cities = cur.fetchall()
+
+for (city_query,) in cities:
     try:
         # OpenWeather get data from API
-        response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&APPID={apikey}")
+        response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city_query}&units=metric&APPID={apikey}")
         if response.status_code == 200:
             payload_json = response.json()
             data = json.dumps(payload_json)
@@ -37,13 +46,13 @@ for city in cities:
             "INSERT INTO bronze.openweather_raw (payload) VALUES (%s);",
             (data,)
         )
-        print(f"City: {city} OK!")
+        print(f"City: {city_query} OK!")
     except Exception as e:
-        print(f"Error {city}:",e)
+        print(f"[ERROR] {city_query}:",e)
 try:
     conn.commit()
 except Exception as e:
-    print(f"Error:",e)
+    print(f"[ERROR]:",e)
 cur.close()
 conn.close()
 

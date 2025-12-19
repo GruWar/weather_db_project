@@ -1,7 +1,7 @@
 {
   "cities": [
     {
-      "city_name": "Prague",
+      "city_name": "Praha",
       "country_code": "CZ",
       "lat": 50.088,
       "lon": 14.4208,
@@ -39,6 +39,146 @@
         },
         "meteostat": {
           "station_id": "11782"
+        }
+      }
+    },
+    {
+      "city_name": "Plzeň",
+      "country_code": "CZ",
+      "lat": 49.67,
+      "lon": 13.27,
+      "sources": {
+        "openweather": {
+          "city_query": "Pilsen,CZ"
+        },
+        "meteostat": {
+          "station_id": "11448"
+        }
+      }
+    },
+    {
+      "city_name": "České Budějovice",
+      "country_code": "CZ",
+      "lat": 48.9745,
+      "lon": 14.4743,
+      "sources": {
+        "openweather": {
+          "city_query": "Ceske Budejovice,CZ"
+        },
+        "meteostat": {
+          "station_id": "11538"
+        }
+      }
+    },
+    {
+      "city_name": "Hradec Králové",
+      "country_code": "CZ",
+      "lat": 50.2092,
+      "lon": 15.8328,
+      "sources": {
+        "openweather": {
+          "city_query": "Hradec Kralove,CZ"
+        },
+        "meteostat": {
+          "station_id": "11652"
+        }
+      }
+    },
+    {
+      "city_name": "Pardubice",
+      "country_code": "CZ",
+      "lat": 50.0408,
+      "lon": 15.7766,
+      "sources": {
+        "openweather": {
+          "city_query": "Pardubice,CZ"
+        },
+        "meteostat": {
+          "station_id": "11652"
+        }
+      }
+    },
+    {
+      "city_name": "Jihlava",
+      "country_code": "CZ",
+      "lat": 49.3961,
+      "lon": 15.5912,
+      "sources": {
+        "openweather": {
+          "city_query": "Jihlava,CZ"
+        },
+        "meteostat": {
+          "station_id": "11659"
+        }
+      }
+    },
+    {
+      "city_name": "Karlovy Vary",
+      "country_code": "CZ",
+      "lat": 50.2319,
+      "lon": 12.8714,
+      "sources": {
+        "openweather": {
+          "city_query": "Karlovy Vary,CZ"
+        },
+        "meteostat": {
+          "station_id": "11414"
+        }
+      }
+    },
+    {
+      "city_name": "Ustí nad Labem",
+      "country_code": "CZ",
+      "lat": 50.6606,
+      "lon": 14.0407,
+      "sources": {
+        "openweather": {
+          "city_query": "Usti nad Labem,CZ"
+        },
+        "meteostat": {
+          "station_id": "11502"
+        }
+      }
+    },
+    {
+      "city_name": "Liberec",
+      "country_code": "CZ",
+      "lat": 50.7671,
+      "lon": 15.0562,
+      "sources": {
+        "openweather": {
+          "city_query": "Liberec,CZ"
+        },
+        "meteostat": {
+          "station_id": "11603"
+        }
+      }
+    },
+    {
+      "city_name": "Olomouc",
+      "country_code": "CZ",
+      "lat": 49.5938,
+      "lon": 17.2509,
+      "sources": {
+        "openweather": {
+          "city_query": "Olomouc,CZ"
+        },
+        "meteostat": {
+          "station_id": "11544"
+        }
+      }
+    },
+    {
+      "city_name": "Zlín",
+      "country_code": "CZ",
+      "lat": 49.2265,
+      "lon": 17.6663,
+      "sources": {
+        "openweather": {
+          "city_query": "Zlin,CZ"
+        },
+        "meteostat": {
+          "station_id": "11774"
         }
       }
     }

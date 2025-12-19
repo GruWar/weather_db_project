@@ -6,39 +6,46 @@ import json
 import os
 
 load_dotenv()
-apikey = os.getenv("METEOSTAT_API_KEY")
-stations = {
-    "Prague,CZ":"11518",
-    "Brno,CZ":"11723",
-    "Ostrava,CZ":"11782",
+
+# --- CONFIG ---
+API_KEY = os.getenv("METEOSTAT_API_KEY")
+
+HEADERS = {
+    "x-rapidapi-key": API_KEY,
+    "x-rapidapi-host": "meteostat.p.rapidapi.com"
 }
-start_date = datetime.today() - timedelta(days=365)
-start_date = start_date.strftime('%Y-%m-%d')
-end_date = datetime.today() - timedelta(days=1)
-end_date = end_date.strftime('%Y-%m-%d')
-conn_params = {
+
+START_DATE = (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
+END_DATE = (datetime.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+DB_PARAMS = {
     "host": os.getenv("DB_HOST"),
     "port": os.getenv("DB_PORT"),
     "database": os.getenv("DB_NAME"),
     "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASSWORD")
+    "password": os.getenv("DB_PASSWORD"),
 }
-headers = {
-	"x-rapidapi-key": apikey,
-	"x-rapidapi-host": "meteostat.p.rapidapi.com"
-}
-# Connect to DB and load data
-try:
-    conn = psycopg2.connect(**conn_params)
-    print("Connected to DB")
-    cur = conn.cursor()
-except Exception as e:
-    print(f"Error:",e)
 
-for station, station_id in stations.items():
+# --- DB CONNECT ---
+conn = psycopg2.connect(**DB_PARAMS)
+cur = conn.cursor()
+print("Connected to DB")
+
+# --- LOAD CITIES FROM DB ---
+cur.execute("""
+    SELECT
+        city_id,
+        meteostat_id
+    FROM silver.dim_city
+    WHERE meteostat_id IS NOT NULL
+""")
+
+cities = cur.fetchall()
+
+# --- INGEST LOOP ---
+for city_id, station_id in cities:
     try:
-        # Meteostat get data from API
-        response = requests.get(f"https://meteostat.p.rapidapi.com/stations/daily?station={station_id}&start={start_date}&end={end_date}", headers=headers)
+        response = requests.get(f"https://meteostat.p.rapidapi.com/stations/daily?station={station_id}&start={START_DATE}&end={END_DATE}", headers=HEADERS)
         if response.status_code == 200:
             payload_json = response.json()
             data = json.dumps(payload_json)
@@ -49,12 +56,14 @@ for station, station_id in stations.items():
             "INSERT INTO bronze.meteostat_raw (station_id,payload) VALUES (%s, %s);",
             (station_id, data,)
         )
-        print(f"Station: {station} OK!")
+
+        print(f"[OK] City {city_id} / Station {station_id}")
+
     except Exception as e:
-        print(f"Error {station}:",e)
-try:
-    conn.commit()
-except Exception as e:
-    print(f"Error:",e)
+        print(f"[ERROR] Station {station_id}: {e}")
+
+# --- COMMIT & CLOSE ---
+conn.commit()
 cur.close()
 conn.close()
+print("Done.")

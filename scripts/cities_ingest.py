@@ -41,16 +41,18 @@ for city in cities:
             """
             INSERT INTO silver.dim_city (
                 city_name,
+                city_query,
                 country_code,
                 meteostat_id,
                 lat,
                 lon
             )
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT (city_name, country_code) DO NOTHING;
             """,
             (
                 city["city_name"],
+                city["sources"]["openweather"]["city_query"],
                 city["country_code"],
                 city["sources"]["meteostat"]["station_id"],
                 city["lat"],
@@ -59,7 +61,7 @@ for city in cities:
         )
         print(f"Inserted: {city['city_name']}, {city['country_code']}")
     except Exception as e:
-        print(f"Error inserting {city['city_name']}: {e}")
+        print(f"[ERROR] inserting {city['city_name']}: {e}")
 
 # Commit & close
 conn.commit()
