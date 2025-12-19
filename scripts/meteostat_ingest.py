@@ -19,11 +19,11 @@ START_DATE = (datetime.today() - timedelta(days=365)).strftime("%Y-%m-%d")
 END_DATE = (datetime.today() - timedelta(days=1)).strftime("%Y-%m-%d")
 
 DB_PARAMS = {
-    "host": os.getenv("DB_HOST"),
-    "port": os.getenv("DB_PORT"),
-    "database": os.getenv("DB_NAME"),
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASSWORD"),
+    "host": os.getenv("WEATHER_DB_HOST"),
+    "port": os.getenv("WEATHER_DB_PORT"),
+    "database": os.getenv("WEATHER_DB_NAME"),
+    "user": os.getenv("WEATHER_DB_USER"),
+    "password": os.getenv("WEATHER_DB_PASSWORD"),
 }
 
 # --- DB CONNECT ---

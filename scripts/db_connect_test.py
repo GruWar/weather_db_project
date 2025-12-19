@@ -1,12 +1,15 @@
+from dotenv import load_dotenv
 import psycopg2
+import os
+load_dotenv()
 
 # Připojovací parametry
 conn_params = {
-    "host": "localhost",
-    "port": 5432,
-    "database": "weather_db",
-    "user": "postgres",
-    "password": "password"
+    "host": os.getenv("WEATHER_DB_HOST"),
+    "port": os.getenv("WEATHER_DB_PORT"),
+    "database": os.getenv("WEATHER_DB_NAME"),
+    "user": os.getenv("WEATHER_DB_USER"),
+    "password": os.getenv("WEATHER_DB_PASSWORD")
 }
 
 try:

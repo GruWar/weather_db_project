@@ -7,11 +7,11 @@ import os
 load_dotenv()
 apikey = os.getenv("OPENWEATHER_API_KEY")
 conn_params = {
-    "host": os.getenv("DB_HOST"),
-    "port": os.getenv("DB_PORT"),
-    "database": os.getenv("DB_NAME"),
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASSWORD")
+    "host": os.getenv("WEATHER_DB_HOST"),
+    "port": os.getenv("WEATHER_DB_PORT"),
+    "database": os.getenv("WEATHER_DB_NAME"),
+    "user": os.getenv("WEATHER_DB_USER"),
+    "password": os.getenv("WEATHER_DB_PASSWORD")
 }
 
 # Connect to DB and load data

@@ -1,14 +1,138 @@
+version: "3.9"
+
 services:
+  # =========================
+  # PostgreSQL – Airflow metadata DB
+  # =========================
   postgres:
     image: postgres:15
-    container_name: weather_pg
+    container_name: airflow-postgres
     environment:
-      POSTGRES_DB: weather_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${AIRFLOW_DB_NAME}
+      POSTGRES_USER: ${AIRFLOW_DB_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - airflow_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =========================
+  # PostgreSQL – Weather DB (DATA)
+  # =========================
+  weather-db:
+    image: postgres:15
+    container_name: weather-db
+    environment:
+      POSTGRES_DB: ${WEATHER_DB_NAME}
+      POSTGRES_USER: ${WEATHER_DB_USER}
+      POSTGRES_PASSWORD: ${WEATHER_DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - weather_data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - airflow_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weather -d weather"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =========================
+  # pgAdmin
+  # =========================
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - airflow_net
+
+  # =========================
+  # Airflow INIT (RUN ONCE)
+  # =========================
+  airflow-init:
+    image: apache/airflow:2.9.1-python3.11
+    container_name: airflow-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@postgres/${AIRFLOW_DB_NAME}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create --username ${AIRFLOW_USER} --password ${AIRFLOW_PASSWORD} --firstname Airflow --lastname Admin --role Admin --email admin@example.com || true
+      "
+    networks:
+      - airflow_net
+
+  # =========================
+  # Airflow Webserver + Scheduler
+  # =========================
+  air-flow:
+    image: apache/airflow:2.9.1-python3.11
+    container_name: airflow
+    restart: always
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASSWORD}@postgres/${AIRFLOW_DB_NAME}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    volumes:
+      - "./dags:/opt/airflow/dags"
+      - "./scripts:/opt/airflow/scripts"
+      - "./sql:/opt/airflow/sql"
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "
+      airflow scheduler & airflow webserver
+      "
+
+    networks:
+      - airflow_net
+
+  # =========================
+  # Metabase
+  # =========================
+  metabase:
+    image: metabase/metabase
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - airflow_net
+
+# =========================
+# Volumes
+# =========================
 volumes:
-  pgdata:
+  postgres_data:
+  weather_data:
+
+# =========================
+# Networks
+# =========================
+networks:
+  airflow_net:
