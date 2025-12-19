@@ -19,4 +19,3 @@ FROM bronze.openweather_raw AS r
 INNER JOIN silver.dim_city AS c
     ON c.city_name = (r.payload ->> 'name')
 ON CONFLICT (city_id, date) DO NOTHING;
-
