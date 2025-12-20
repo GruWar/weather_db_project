@@ -1,59 +1,67 @@
-from dotenv import load_dotenv
 import psycopg2
 import requests
 import json
-import os
+from airflow.hooks.base import BaseHook
+from airflow.models import Variable
+import logging
 
-load_dotenv()
-apikey = os.getenv("OPENWEATHER_API_KEY")
-conn_params = {
-    "host": os.getenv("WEATHER_DB_HOST"),
-    "port": os.getenv("WEATHER_DB_PORT"),
-    "database": os.getenv("WEATHER_DB_NAME"),
-    "user": os.getenv("WEATHER_DB_USER"),
-    "password": os.getenv("WEATHER_DB_PASSWORD")
-}
+log = logging.getLogger(__name__)
 
-# Connect to DB and load data
-try:
-    conn = psycopg2.connect(**conn_params)
-    print("Connected to DB")
-    cur = conn.cursor()
-except Exception as e:
-    print(f"[ERROR]:",e)
+def main():
+    log.info("Starting openweather ingest")
+    # --- CONFIG ---
+    API_KEY = Variable.get("OPENWEATHER_API_KEY")
+    conn = BaseHook.get_connection("weather_db")
+    # DB connect parametters
+    conn_params = {
+        "host": conn.host,
+        "port": conn.port,
+        "database": conn.schema,
+        "user": conn.login,
+        "password": conn.password
+    }
 
-# --- LOAD CITIES FROM DB ---
-cur.execute("""
-    SELECT
-        city_query
-    FROM silver.dim_city
-    WHERE city_query IS NOT NULL
-""")
-
-cities = cur.fetchall()
-
-for (city_query,) in cities:
+    # Connect to DB and load data
     try:
-        # OpenWeather get data from API
-        response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city_query}&units=metric&APPID={apikey}")
-        if response.status_code == 200:
-            payload_json = response.json()
-            data = json.dumps(payload_json)
-        else:
-            print(response.text)
-            continue
-        cur.execute(
-            "INSERT INTO bronze.openweather_raw (payload) VALUES (%s);",
-            (data,)
-        )
-        print(f"City: {city_query} OK!")
+        conn = psycopg2.connect(**conn_params)
+        print("Connected to DB")
+        cur = conn.cursor()
     except Exception as e:
-        print(f"[ERROR] {city_query}:",e)
-try:
-    conn.commit()
-except Exception as e:
-    print(f"[ERROR]:",e)
-cur.close()
-conn.close()
+        print(f"[ERROR]:",e)
+
+    # --- LOAD CITIES FROM DB ---
+    cur.execute("""
+        SELECT
+            city_query
+        FROM silver.dim_city
+        WHERE city_query IS NOT NULL
+    """)
+
+    cities = cur.fetchall()
+
+    for (city_query,) in cities:
+        try:
+            # OpenWeather get data from API
+            response = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city_query}&units=metric&APPID={API_KEY}")
+            if response.status_code == 200:
+                payload_json = response.json()
+                data = json.dumps(payload_json)
+            else:
+                print(response.text)
+                continue
+            cur.execute(
+                "INSERT INTO bronze.openweather_raw (payload) VALUES (%s);",
+                (data,)
+            )
+            print(f"City: {city_query} OK!")
+        except Exception as e:
+            print(f"[ERROR] {city_query}:",e)
+    try:
+        conn.commit()
+    except Exception as e:
+        print(f"[ERROR]:",e)
+    cur.close()
+    conn.close()
+    log.info("openweather ingest finished successfully")
 
 
